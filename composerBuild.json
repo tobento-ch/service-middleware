@@ -1,0 +1,51 @@
+{
+    "name": "tobento/service-middleware",
+    "type": "library",
+    "description": "A PSR-15 middleware dispatcher with autowiring and alias support.",
+    "keywords": [
+        "tobento",
+        "package",
+        "middleware",
+        "psr-15"
+	],
+    "homepage": "https://www.tobento.ch",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tobias Strub",
+            "email": "info@tobento.ch",
+            "homepage": "https://www.tobento.ch"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,    
+    "require": {
+        "php": ">=8.0",
+        "psr/http-message": "^1.0",
+        "psr/http-server-handler": "^1.0",
+        "psr/http-server-middleware": "^1.0",
+        "tobento/service-autowire": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5",
+        "vimeo/psalm": "^4.0",
+        "nyholm/psr7": "^1.4",
+        "laminas/laminas-httphandlerrunner": "^1.4",
+        "tobento/service-container": "^1.0"
+    },    
+    "autoload": {
+        "psr-4": {
+            "Tobento\\Service\\Middleware\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tobento\\Service\\Middleware\\Test\\": "tests",
+            "App\\": "build/src"
+        }
+    },
+    "scripts": {
+        "test": "phpunit --testdox --colors=always",
+        "psalm": "vendor/bin/psalm"
+    }
+}
