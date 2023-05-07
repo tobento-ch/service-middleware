@@ -24,6 +24,13 @@ use Psr\Http\Server\MiddlewareInterface;
 interface MiddlewareDispatcherInterface extends RequestHandlerInterface
 {
     /**
+     * Returns a new instance.
+     *
+     * @return static
+     */
+    public function new(): static;
+    
+    /**
      * Add a middleware or multiple.
      *
      * @param mixed $middleware Any middleware.

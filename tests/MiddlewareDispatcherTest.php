@@ -58,6 +58,28 @@ class MiddlewareDispatcherTest extends TestCase
             $this->createMiddlewareDispatcher()
         );
     }
+
+    public function testNewMethod()
+    {
+        $md = $this->createMiddlewareDispatcher();
+        $mdNew = $md->new();
+        
+        $this->assertInstanceof(MiddlewareDispatcher::class, $mdNew);
+        $this->assertFalse($md === $mdNew);
+    }
+    
+    public function testNewMethodKeepsAliases()
+    {
+        $md = $this->createMiddlewareDispatcher();
+        $md->addAlias('name', MiddlewareWithParameters::class);
+        
+        $this->assertSame(
+            [
+                'name' => MiddlewareWithParameters::class,
+            ],
+            $md->new()->getAliases()
+        );
+    }
     
     public function testAddAliasMethod()
     {

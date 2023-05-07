@@ -47,6 +47,18 @@ class MiddlewareDispatcher implements MiddlewareDispatcherInterface
     ) {}
     
     /**
+     * Returns a new instance.
+     *
+     * @return static
+     */
+    public function new(): static
+    {
+        $new = clone $this;
+        $new->middleware = [];
+        return $new;
+    }
+    
+    /**
      * Add a middleware or multiple.
      *
      * @param mixed $middleware Any middleware.
@@ -154,6 +166,7 @@ class MiddlewareDispatcher implements MiddlewareDispatcherInterface
      *
      * @param ServerRequestInterface $request
      * @return ResponseInterface
+     * @psalm-suppress UnusedVariable
      */    
     protected function dispatching(ServerRequestInterface $request): ResponseInterface
     {            
