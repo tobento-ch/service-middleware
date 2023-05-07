@@ -53,6 +53,14 @@ $dispatcher = new MiddlewareDispatcher(
 );
 ```
 
+**new**
+
+You may use the ```new``` method to create a new instance. It will keep the added aliases though.
+
+```php
+$newDispatcher = $dispatcher->new();
+```
+
 ## Adding Middleware
 
 By anonymous function:
