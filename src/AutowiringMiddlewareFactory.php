@@ -29,7 +29,7 @@ class AutowiringMiddlewareFactory implements MiddlewareFactoryInterface
     /**
      * @var Autowire
      */    
-    private Autowire $autowire;
+    protected Autowire $autowire;
     
     /**
      * Create a new MiddlewareDispatcher.
@@ -37,9 +37,9 @@ class AutowiringMiddlewareFactory implements MiddlewareFactoryInterface
      * @param ContainerInterface $container
      */    
     public function __construct(
-        protected ContainerInterface $container
+        ContainerInterface $container
     ) {
-        $this->autowire = new Autowire($this->container);
+        $this->autowire = new Autowire($container);
     }
     
     /**
