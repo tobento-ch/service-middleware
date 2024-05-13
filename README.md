@@ -11,6 +11,7 @@ A PSR-15 middleware dispatcher with autowiring and alias support.
     - [Creating Middleware Dispatcher](#creating-middleware-dispatcher)
     - [Adding Middleware](#adding-middleware)
     - [Aliases](#aliases)
+    - [Groups](#groups)
     - [Stack Priority](#stack-priority)
     - [Dispatch](#dispatch)
 - [Credits](#credits)
@@ -198,6 +199,25 @@ $dispatcher->add('alias');
 
 // if you have not resolvable parameters:
 $dispatcher->add(['alias', 'name' => 'Sam']);
+```
+
+## Groups
+
+You might want to add a group of middlewares:
+
+```php
+$dispatcher->addGroup(name: 'api', middlewares: [
+    Middleware::class,
+    // with build-in parameters:
+    [AnotherMiddleware::class, 'name' => 'Sam'],
+    // by alias:
+    'aliasedMiddleware',
+    // by class instance:
+    new SomeMiddleware(),
+]);
+
+// add middlewares by group:
+$dispatcher->add('api');
 ```
 
 ## Stack Priority
