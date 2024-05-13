@@ -95,6 +95,16 @@ class MiddlewareDispatcherTest extends TestCase
         );
     }
     
+    public function testAddAliasMethodThrowsInvalidArgumentExceptionIfAGroupWithSameNameExists()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        
+        $md = $this->createMiddlewareDispatcher();
+        
+        $md->addGroup('name', [MiddlewareWithParameters::class]);
+        $md->addAlias('name', MiddlewareWithParameters::class);
+    }
+    
     public function testAddAliasesMethod()
     {
         $md = $this->createMiddlewareDispatcher();
@@ -131,6 +141,30 @@ class MiddlewareDispatcherTest extends TestCase
             $md->getAliases()
         );
     }
+    
+    public function testAddGroupMethod()
+    {
+        $md = $this->createMiddlewareDispatcher();
+        
+        $md->addGroup('name', [MiddlewareWithParameters::class]);
+        
+        $this->assertSame(
+            [
+                'name' => [MiddlewareWithParameters::class],
+            ],
+            $md->getGroups()
+        );
+    }
+    
+    public function testAddGroupMethodThrowsInvalidArgumentExceptionIfAnAliasWithSameNameExists()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        
+        $md = $this->createMiddlewareDispatcher();
+        
+        $md->addAlias('name', MiddlewareWithParameters::class);
+        $md->addGroup('name', [MiddlewareWithParameters::class]);
+    }    
 
     public function testThatUnresolvableMiddlewareThrowsInvalidMiddlewareException()
     {
@@ -240,7 +274,7 @@ class MiddlewareDispatcherTest extends TestCase
             'MiddlewareWithoutParameters',
             (string)$response->getBody()
         );
-    } 
+    }
     
     public function testThatAliasIsUsedOnArrayMiddleware()
     {
@@ -256,7 +290,53 @@ class MiddlewareDispatcherTest extends TestCase
             'MiddlewareWithBuildInParameter',
             (string)$response->getBody()
         );
-    }    
+    }
+    
+    public function testThatGroupIsUsedOnStringMiddleware()
+    {
+        $md = $this->createMiddlewareDispatcher();
+        
+        $md->addGroup('foo', [MiddlewareWithoutParameters::class]);
+        $md->add('foo');
+        
+        $response = $md->handle($this->createServerRequest());
+        
+        $this->assertSame(
+            'MiddlewareWithoutParameters',
+            (string)$response->getBody()
+        );
+    }
+    
+    public function testThatGroupIsUsedWithBuildInParametersMiddleware()
+    {
+        $md = $this->createMiddlewareDispatcher();
+        
+        $md->addGroup('foo', [[MiddlewareWithBuildInParameter::class, 'number' => 50]]);
+        $md->add('foo');
+        
+        $response = $md->handle($this->createServerRequest());
+        
+        $this->assertSame(
+            'MiddlewareWithBuildInParameter',
+            (string)$response->getBody()
+        );
+    }
+    
+    public function testThatGroupIsUsedAndAliasedMiddleware()
+    {
+        $md = $this->createMiddlewareDispatcher();
+        
+        $md->addAlias('bar', MiddlewareWithoutParameters::class);
+        $md->addGroup('foo', ['bar']);
+        $md->add('foo');
+        
+        $response = $md->handle($this->createServerRequest());
+        
+        $this->assertSame(
+            'MiddlewareWithoutParameters',
+            (string)$response->getBody()
+        );
+    }
     
     public function testMiddlewareIsProcessedInRightOrder()
     {
