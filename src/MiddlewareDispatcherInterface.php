@@ -35,7 +35,7 @@ interface MiddlewareDispatcherInterface extends RequestHandlerInterface
      *
      * @param mixed $middleware Any middleware.
      * @return static $this
-     */    
+     */
     public function add(mixed ...$middleware): static;
 
     /**
@@ -44,7 +44,7 @@ interface MiddlewareDispatcherInterface extends RequestHandlerInterface
      * @param string $alias An alias.
      * @param string $middleware The class Namespace\Middleware::class
      * @return static $this
-     */    
+     */
     public function addAlias(string $alias, string $middleware): static;
 
     /**
@@ -52,7 +52,7 @@ interface MiddlewareDispatcherInterface extends RequestHandlerInterface
      *
      * @param array<string, string> $aliases ['alias' => Namespace\Middleware::class]
      * @return static $this
-     */    
+     */
     public function addAliases(array $aliases): static;
 
     /**
@@ -60,13 +60,29 @@ interface MiddlewareDispatcherInterface extends RequestHandlerInterface
      *
      * @param array<string, string> $aliases ['alias' => Namespace\Middleware::class]
      * @return static $this
-     */    
+     */
     public function setAliases(array $aliases): static;
     
     /**
      * Gets the middleware aliases.
      *
      * @return array<string, string> ['alias' => Namespace\Middleware::class]
-     */    
+     */
     public function getAliases(): array;
+    
+    /**
+     * Add a middleware group.
+     *
+     * @param string $name A group name.
+     * @param array $middlewares
+     * @return static $this
+     */
+    public function addGroup(string $name, array $middlewares): static;
+    
+    /**
+     * Gets the middleware groups.
+     *
+     * @return array<string, array> ['name' => []]
+     */
+    public function getGroups(): array;
 }

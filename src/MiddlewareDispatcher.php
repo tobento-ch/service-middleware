@@ -27,20 +27,25 @@ class MiddlewareDispatcher implements MiddlewareDispatcherInterface
 {    
     /**
      * @var array The registered middleware.
-     */    
+     */
     protected array $middleware = [];
 
     /**
      * @var array The registered middleware aliases.
-     */    
-    protected array $middlewareAliases = [];    
+     */
+    protected array $middlewareAliases = [];
+    
+    /**
+     * @var array The registered middleware groups.
+     */
+    protected array $middlewareGroups = [];
 
     /**
      * Create a new MiddlewareDispatcher.
      *
      * @param RequestHandlerInterface $fallbackHandler
      * @param MiddlewareFactoryInterface $middlewareFactory
-     */    
+     */
     public function __construct(
         protected RequestHandlerInterface $fallbackHandler,
         protected MiddlewareFactoryInterface $middlewareFactory
@@ -63,7 +68,7 @@ class MiddlewareDispatcher implements MiddlewareDispatcherInterface
      *
      * @param mixed $middleware Any middleware.
      * @return static $this
-     */    
+     */
     public function add(mixed ...$middleware): static
     {
         $priority = (int)($middleware['priority'] ?? 0);
@@ -71,24 +76,28 @@ class MiddlewareDispatcher implements MiddlewareDispatcherInterface
     
         foreach($middleware as $mw)
         {            
-            if ($mw instanceof MiddlewareInterface)
-            {
+            if ($mw instanceof MiddlewareInterface) {
                 $this->middleware[$priority][$mw::class] = $mw;
+                continue;
             }
 
-            if (is_string($mw))
-            {
+            if (is_string($mw)) {
+                if (isset($this->middlewareGroups[$mw])) {
+                    foreach($this->middlewareGroups[$mw] as $groupMw) {
+                        $this->add($groupMw);
+                    }
+                    continue;
+                }
+                
                 $mw = $this->middlewareAliases[$mw] ?? $mw;
                 $this->middleware[$priority][$mw] = $mw;
             }
 
-            if (is_callable($mw))
-            {
+            if (is_callable($mw)){
                 $this->middleware[$priority][] = $mw;
             }
 
-            if (is_array($mw) && isset($mw[0]) && is_string($mw[0]))
-            {
+            if (is_array($mw) && isset($mw[0]) && is_string($mw[0])) {
                 $mw[0] = $this->middlewareAliases[$mw[0]] ?? $mw[0];
                 $this->middleware[$priority][$mw[0]] = $mw;
             }
@@ -103,9 +112,15 @@ class MiddlewareDispatcher implements MiddlewareDispatcherInterface
      * @param string $alias An alias.
      * @param string $middleware The class Namespace\Middleware::class
      * @return static $this
-     */    
+     */
     public function addAlias(string $alias, string $middleware): static
     {
+        if (isset($this->middlewareGroups[$alias])) {
+            throw new \InvalidArgumentException(
+                sprintf('A middleware group for the alias "%s" exists. Define another alias!', $alias)
+            );
+        }
+        
         $this->middlewareAliases[$alias] = $middleware;
         
         return $this;
@@ -116,11 +131,10 @@ class MiddlewareDispatcher implements MiddlewareDispatcherInterface
      *
      * @param array<string, string> $aliases ['alias' => Namespace\Middleware::class]
      * @return static $this
-     */    
+     */
     public function addAliases(array $aliases): static
     {
-        foreach($aliases as $alias => $mw)
-        {
+        foreach($aliases as $alias => $mw) {
             $this->addAlias($alias, $mw);
         }
         
@@ -132,7 +146,7 @@ class MiddlewareDispatcher implements MiddlewareDispatcherInterface
      *
      * @param array<string, string> $aliases ['alias' => Namespace\Middleware::class]
      * @return static $this
-     */    
+     */
     public function setAliases(array $aliases): static
     {
         $this->middlewareAliases = $aliases;
@@ -144,11 +158,41 @@ class MiddlewareDispatcher implements MiddlewareDispatcherInterface
      * Gets the middleware aliases.
      *
      * @return array<string, string> ['alias' => Namespace\Middleware::class]
-     */    
+     */
     public function getAliases(): array
     {
         return $this->middlewareAliases;
-    }    
+    }
+    
+    /**
+     * Add a middleware group.
+     *
+     * @param string $name A group name.
+     * @param array $middlewares
+     * @return static $this
+     */
+    public function addGroup(string $name, array $middlewares): static
+    {
+        if (isset($this->middlewareAliases[$name])) {
+            throw new \InvalidArgumentException(
+                sprintf('A middleware alias for the group "%s" exists. Define another group name!', $name)
+            );
+        }
+        
+        $this->middlewareGroups[$name] = $middlewares;
+        
+        return $this;
+    }
+    
+    /**
+     * Gets the middleware groups.
+     *
+     * @return array<string, array> ['name' => []]
+     */
+    public function getGroups(): array
+    {
+        return $this->middlewareGroups;
+    }
             
     /**
      * Dispatches the middleware stack.
@@ -174,8 +218,7 @@ class MiddlewareDispatcher implements MiddlewareDispatcherInterface
         krsort($this->middleware);
         
         // Merge into one array depth.
-        if (!empty($this->middleware))
-        {
+        if (!empty($this->middleware)) {
             $this->middleware = call_user_func_array('array_merge', $this->middleware);
         }
         
