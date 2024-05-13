@@ -77,8 +77,7 @@ class AutowiringMiddlewareFactory implements MiddlewareFactoryInterface
             $middleware = $middleware[0];
         }
         
-        if (!is_string($middleware))
-        {
+        if (!is_string($middleware)) {
             throw new InvalidMiddlewareException($middleware);
         }    
         
@@ -88,8 +87,7 @@ class AutowiringMiddlewareFactory implements MiddlewareFactoryInterface
             throw new InvalidMiddlewareException($middleware, $e->getMessage());
         }
         
-        if (! $middleware instanceof MiddlewareInterface)
-        {
+        if (! $middleware instanceof MiddlewareInterface) {
             throw new InvalidMiddlewareException($middleware);
         }
         
