@@ -40,11 +40,14 @@ class AutowiringMiddlewareFactory implements MiddlewareFactoryInterface
      * Create a new MiddlewareDispatcher.
      *
      * @param ContainerInterface $container
+     * @param array $replaces
      */    
     public function __construct(
-        ContainerInterface $container
+        ContainerInterface $container,
+        array $replaces = [],
     ) {
         $this->autowire = new Autowire($container);
+        $this->replaces = $replaces;
     }
     
     /**
@@ -112,9 +115,11 @@ class AutowiringMiddlewareFactory implements MiddlewareFactoryInterface
         // handle replaces:
         if (!empty($this->replaces) && array_key_exists($middleware, $this->replaces)) {
             if (is_null($this->replaces[$middleware])) {
-                return $this->createCallableMiddleware(function ($request, $handler) {
-                    return $handler->handle($request);
-                });
+                return $this->createCallableMiddleware(
+                    function (ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+                        return $handler->handle($request);
+                    }
+                );
             } else {
                 return $this->createMiddleware($this->replaces[$middleware]);
             }
