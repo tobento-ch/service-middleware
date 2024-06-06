@@ -73,7 +73,62 @@ class AutowiringMiddlewareFactoryTest extends TestCase
             MiddlewareInterface::class,
             $factory->createMiddleware(function($request, $handler) {
                 return $handler->handle($request);
-            }));
+            })
+        );
+    }
+    
+    public function testReplaceMiddlewareWithString()
+    {
+        $factory = $this->createFactory();
+        $factory->replaceMiddleware(
+            MiddlewareWithoutParameters::class,
+            MiddlewareWithParameters::class
+        );
+        
+        $this->assertInstanceof(
+            MiddlewareWithParameters::class,
+            $factory->createMiddleware([MiddlewareWithoutParameters::class])
+        );
+    }
+    
+    public function testReplaceMiddlewareWithArray()
+    {
+        $factory = $this->createFactory();
+        $factory->replaceMiddleware(
+            MiddlewareWithoutParameters::class,
+            [MiddlewareWithBuildInParameter::class, 'number' => 20]
+        );
+        
+        $this->assertInstanceof(
+            MiddlewareWithBuildInParameter::class,
+            $factory->createMiddleware([MiddlewareWithoutParameters::class])
+        );
+    }
+    
+    public function testReplaceMiddlewareWithNullCreatesAnonymous()
+    {
+        $factory = $this->createFactory();
+        $factory->replaceMiddleware(
+            MiddlewareWithoutParameters::class,
+            null
+        );
+        
+        $refClass = new \ReflectionClass($factory->createMiddleware([MiddlewareWithoutParameters::class]));
+        
+        $this->assertTrue($refClass->isAnonymous());
+    }
+    
+    public function testGetReplaceMiddlewares()
+    {
+        $factory = $this->createFactory();
+        $factory->replaceMiddleware(
+            MiddlewareWithoutParameters::class,
+            null
+        );
+        
+        $this->assertSame([
+            MiddlewareWithoutParameters::class => null,
+        ], $factory->getReplaceMiddlewares());
     }
     
     public function testThatUnresolvableMiddlewareThrowsInvalidMiddlewareException()
@@ -81,5 +136,5 @@ class AutowiringMiddlewareFactoryTest extends TestCase
         $this->expectException(InvalidMiddlewareException::class);
         
         $this->createFactory()->createMiddleware('Foo');
-    }    
+    }
 }
