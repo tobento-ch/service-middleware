@@ -117,13 +117,25 @@ class AutowiringMiddlewareFactoryTest extends TestCase
         
         $this->assertTrue($refClass->isAnonymous());
     }
-    
+
     public function testGetReplaceMiddlewares()
     {
         $factory = $this->createFactory();
         $factory->replaceMiddleware(
             MiddlewareWithoutParameters::class,
             null
+        );
+        
+        $this->assertSame([
+            MiddlewareWithoutParameters::class => null,
+        ], $factory->getReplaceMiddlewares());
+    }
+    
+    public function testCreateFactoryWithReplacesMiddlewares()
+    {
+        $factory = new AutowiringMiddlewareFactory(
+            container: new Container(),
+            replaces: [MiddlewareWithoutParameters::class => null]
         );
         
         $this->assertSame([
