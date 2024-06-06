@@ -21,6 +21,22 @@ use Psr\Http\Server\MiddlewareInterface;
 interface MiddlewareFactoryInterface
 {
     /**
+     * Add a middleware to replace.
+     *
+     * @param string $middleware
+     * @param mixed $withMiddleware
+     * @return static $this
+     */
+    public function replaceMiddleware(string $middleware, mixed $withMiddleware): static;
+    
+    /**
+     * Returns the middlewares to replace.
+     *
+     * @return array
+     */
+    public function getReplaceMiddlewares(): array;
+    
+    /**
      * Create middleware.
      *
      * @param mixed $middleware

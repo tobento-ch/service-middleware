@@ -32,6 +32,11 @@ class AutowiringMiddlewareFactory implements MiddlewareFactoryInterface
     protected Autowire $autowire;
     
     /**
+     * @var array The middlewares to replace.
+     */
+    protected array $replaces = [];
+    
+    /**
      * Create a new MiddlewareDispatcher.
      *
      * @param ContainerInterface $container
@@ -40,6 +45,29 @@ class AutowiringMiddlewareFactory implements MiddlewareFactoryInterface
         ContainerInterface $container
     ) {
         $this->autowire = new Autowire($container);
+    }
+    
+    /**
+     * Add a middleware to replace.
+     *
+     * @param string $middleware
+     * @param mixed $withMiddleware
+     * @return static $this
+     */
+    public function replaceMiddleware(string $middleware, mixed $withMiddleware): static
+    {
+        $this->replaces[$middleware] = $withMiddleware;
+        return $this;
+    }
+    
+    /**
+     * Returns the middlewares to replace.
+     *
+     * @return array
+     */
+    public function getReplaceMiddlewares(): array
+    {
+        return $this->replaces;
     }
     
     /**
@@ -79,7 +107,18 @@ class AutowiringMiddlewareFactory implements MiddlewareFactoryInterface
         
         if (!is_string($middleware)) {
             throw new InvalidMiddlewareException($middleware);
-        }    
+        }
+        
+        // handle replaces:
+        if (!empty($this->replaces) && array_key_exists($middleware, $this->replaces)) {
+            if (is_null($this->replaces[$middleware])) {
+                return $this->createCallableMiddleware(function ($request, $handler) {
+                    return $handler->handle($request);
+                });
+            } else {
+                return $this->createMiddleware($this->replaces[$middleware]);
+            }
+        }
         
         try {
             $middleware = $this->autowire->resolve($middleware, $middlwareData);
