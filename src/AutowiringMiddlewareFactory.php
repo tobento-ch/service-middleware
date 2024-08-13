@@ -121,7 +121,9 @@ class AutowiringMiddlewareFactory implements MiddlewareFactoryInterface
                     }
                 );
             } else {
-                return $this->createMiddleware($this->replaces[$middleware]);
+                $mw = $this->replaces[$middleware];
+                unset($this->replaces[$middleware]);
+                return $this->createMiddleware($mw);
             }
         }
         
