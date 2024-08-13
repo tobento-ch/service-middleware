@@ -149,4 +149,18 @@ class AutowiringMiddlewareFactoryTest extends TestCase
         
         $this->createFactory()->createMiddleware('Foo');
     }
+    
+    public function testReplaceMiddlewareWithSameName()
+    {
+        $factory = $this->createFactory();
+        $factory->replaceMiddleware(
+            MiddlewareWithoutParameters::class,
+            MiddlewareWithoutParameters::class
+        );
+        
+        $this->assertInstanceof(
+            MiddlewareWithoutParameters::class,
+            $factory->createMiddleware([MiddlewareWithoutParameters::class])
+        );
+    }
 }
