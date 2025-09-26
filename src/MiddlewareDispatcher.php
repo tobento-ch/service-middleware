@@ -211,6 +211,7 @@ class MiddlewareDispatcher implements MiddlewareDispatcherInterface
      * @param ServerRequestInterface $request
      * @return ResponseInterface
      * @psalm-suppress UnusedVariable
+     * @psalm-suppress UndefinedVariable
      */    
     protected function dispatching(ServerRequestInterface $request): ResponseInterface
     {            
